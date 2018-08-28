@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<meta http-equiv="Content-Script-Type" content="text/javascript">
+		<script type="text/javascript" src="./../imageregist.js"></script>
+		<script>
+			var imgrgst= new ImageRegist(
+				function(response){
+					mes.innerText=response.responseText;
+				},
+				function(response){
+					mes.innerText=response.responseText;
+				},
+				function(response){
+					mes.innerText=response.responseText;
+				}
+			);
+			function send() {
+				var mes = document.getElementById("mes");
+				imgrgst.send("./post_target.php");
+			}
+			function regist() {
+				imgrgst.regist();
+			}
+		</script>
+	</head>
+	<body>
+		<h1>imageregistの動作テスト</h1>
+		<p id="mes">
+		</p>
+		<h2>
+			書き込み(書き込みにはまずID登録が必要です。ID登録は下のフォームでできます。)
+		</h2>
+		<form id="imgForm">
+			クリックしてID登録の時に選んだ画像を選択して下さい。→<input type="file" id="imgSend" multiple></input><br>
+		</form>
+		<form id="contentForm">
+			<input type="text" id="nameSend" name="username" placeholder="ユーザー名を入れて下さい"></input><br>
+			<textarea id="writeContent" name="writeContentBoard" placeholder="怒られない程度に書きたいことを書いて下さい。"></textarea><br>
+			<input type="button" onclick="send();" value="押すと書き込み"></input><br>
+		</form>
+		<h2>
+			ID登録
+		</h2>
+		<form id="formRegist" enctype="multipart/form-data">
+			ID認証に使う画像を選んで下さい→<input type="file" id="imgRegist" name="registImg"></input><br>
+			<input type="text" placeholder="ログイン用の名前を入れて下さい。" id="nameRegist"></input><br>
+		</form>
+		<button type="button" onclick="regist();">押すとID登録</button>
+	</body>
+</html>
