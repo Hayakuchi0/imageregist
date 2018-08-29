@@ -18,7 +18,7 @@
 		if(file_exists($hashpath)) {
 			$list=file($hashpath,FILE_IGNORE_NEW_LINES);
 			$login_num=(((int)$list[0])%$regist_hash_linenum)+1;
-			$hash_point_data=split(":",$list[$login_num]);
+			$hash_point_data=explode(":",$list[$login_num]);
 			print($hash_point_data[0]);
 		} else {
 			print("そのユーザーは存在しません。ユーザー名をもう一度確認して下さい。");

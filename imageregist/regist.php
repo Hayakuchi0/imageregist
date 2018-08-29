@@ -27,7 +27,7 @@
 	 * 制限として文字数40文字以内、半角英数字以外使用禁止としている。この制限は撤廃可能。
 	 * ただし、img_tnが画像であることもここでチェックしてる。現在対応しているのはjpgとpngとgifのみ。
 	 * @param string $img_tn POSTするFormData型変数のappend関数に追加するユーザー名の名前
-	 * @param string $user_tn POSTするFormData型変数のappend関数に追加するfile型の画像の名前
+	 * @param string $user_tn POSTするFormData型変数のappend関数に追加するfile型の名前
 	 * @return bool アップロードされたファイルが正常に処理できるかどうかを返す値
 	 */
 	function regist_check($img_tn,$user_tn) {

@@ -50,7 +50,7 @@
 			$hashpath=$id_files_locate_dir."".$username.".kh";
 			$list=file($hashpath,FILE_IGNORE_NEW_LINES);
 			$login_num=(((int)$list[0])%$regist_hash_linenum)+1;
-			$hash_point_data=split(":",$list[$login_num]);
+			$hash_point_data=explode(":",$list[$login_num]);
 			if(password_verify($verification_code,$hash_point_data[1])) {
 				$list[0]=$list[0]+1;
 				$out=$list[0];
