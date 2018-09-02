@@ -5,38 +5,54 @@
 		<meta http-equiv="Content-Script-Type" content="text/javascript">
 		<script type="text/javascript" src="./../imageregist.js"></script>
 		<script>
-			var imgrgst= new ImageRegist(
-				function(response){
-					mes.innerText=response.responseText;
-				},
-				function(response){
-					mes.innerText=response.responseText;
-				},
-				function(response){
-					mes.innerText=response.responseText;
-				}
-			);
+			var imgrgst= new ImageRegist("exampleLocalStorageName");
+			imgrgst.onLogin=function(response) {
+				mes.innerText=response.responseText;
+				viewMyUserId();
+			};
+			imgrgst.onRegist=function(response) {
+				mes.innerText=response.responseText;
+			};
+			imgrgst.onSend=function(response) {
+				mes.innerText=response.responseText;
+			};
+			imgrgst.onVerify=function(response) {
+				mes.innerText=response.responseText;
+			};
 			function send() {
 				var mes = document.getElementById("mes");
-				imgrgst.send("./post_target.php");
+				var postElement = document.getElementById("writeContent");
+				var fd = new FormData();
+				fd.append("writeContent",postElement.value);
+				imgrgst.send("./post_target.php",fd);
 			}
 			function regist() {
 				imgrgst.regist();
 			}
+			function login() {
+				imgrgst.login("imgSend","nameSend");
+			}
+			function viewMyUserId() {
+				var mynameTag=document.getElementById("myname");
+				mynameTag.innerText=localStorage.getItem(imgrgst.userName);
+			}
 		</script>
 	</head>
-	<body>
+	<body onload="viewMyUserId();">
 		<h1>imageregistの動作テスト</h1>
 		<p id="mes">
 		</p>
+		<h2>自分のID</h2>
+		<p id="myname">
+		</p>
 		<h2>
-			書き込み(書き込みにはまずID登録が必要です。ID登録は下のフォームでできます。)
+			書き込み(書き込みにはまずログイン及びID登録)
 		</h2>
 		<form id="imgForm">
-			クリックしてID登録の時に選んだ画像を選択して下さい。→<input type="file" id="imgSend" multiple></input><br>
+			<input type="text" id="nameSend" name="username" placeholder="ユーザー名を入れて下さい"></input><br>
+			ユーザー名を入力したあとクリックしてID登録の時に選んだ画像を選択することでログインします。→<input type="file" id="imgSend" multiple onchange="login();"></input><br>
 		</form>
 		<form id="contentForm">
-			<input type="text" id="nameSend" name="username" placeholder="ユーザー名を入れて下さい"></input><br>
 			<textarea id="writeContent" name="writeContentBoard" placeholder="怒られない程度に書きたいことを書いて下さい。"></textarea><br>
 			<input type="button" onclick="send();" value="押すと書き込み"></input><br>
 		</form>

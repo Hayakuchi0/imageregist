@@ -14,26 +14,46 @@ var irpath=document.currentScript.src.substr(0,document.currentScript.src.lastIn
  * </ul>
  * @constructor
  */
-var ImageRegist = function(registmes,sendmes,onVerify){
+var ImageRegist = function(localStorageName){
 	self=this;
 	/**
-	 * ID登録時のレスポンスが戻ってきたときに呼び出される抽象メソッド。
-	 * コンストラクタの第一引数に指定することで内容を定義できる。
+	 * このImageRegistオブジェクトで認証に用いる画像をブラウザに保存するときに使用するlocalStorageのItem名。string型。
+	 * 必須となるstring型の引数です。
+	 */
+	this.localStorageName=localStorageName;
+	/**
+	 * このImageRegistオブジェクトで認証に用いる画像をブラウザに保存するときに使用するlocalStorageのItem名。string型。
+	 * 初期値は"username"。
+	 */
+	this.userName="username";
+	/**
+	 * ID登録時のレスポンスが戻ってきたときに呼び出される抽象メソッド。このメソッドを書き換えることでそのときの処理を記述することができる。
 	 * @param {XMLHttpRequest} xhr registメソッドを用いてajaxリクエストを送るのに使用したXMLHttpRequestオブジェクト
 	 */
-	this.onRegist=registmes;
+	this.onRegist=function(xhr){
+		console.log("response:"+xhr.responseText);
+	};
 	/**
-	 * コンテンツを送信したときに呼び出される抽象メソッド。
-	 * コンストラクタの第二引数に指定することで内容を定義できる。
+	 * コンテンツを送信したときに呼び出されるメソッド。このメソッドを書き換えることでそのときの処理を記述することができる。
 	 * @param {XMLHttpRequest} xhr sendメソッド内のsendContentメソッドを用いてデータの内容を送信するためのajaxリクエストを送るのに使用したXMLHttpRequestオブジェクト
 	 */
-	this.onSend=sendmes;
+	this.onSend=function(xhr){
+		console.log("arrHeader:"+xhr.responseText);
+	};
 	/**
-	 * 画像データのハッシュ値を算出するための、開始位置を表す値を送信したときに呼び出される抽象メソッド。
-	 * コンストラクタの第三引数に指定することで内容を定義できる。
+	 * 画像データのハッシュ値を算出するための、開始位置を表す値を送信したときに呼び出されるメソッド。このメソッドを書き換えることでそのときの処理を記述することができる。
 	 * @param {XMLHttpRequest} xhr sendメソッド内から開始位置を受信するためのajaxリクエストを送るのに使用したXMLHttpRequestオブジェクト
 	 */
-	this.onVerify=onVerify;
+	this.onVerify=function(xhr){
+		console.log("verifyCode:"+xhr.responseText);
+	};
+	/**
+	 * ログインのためにlocalStorageへ画像ファイルを登録し、その画像ファイルでログインが可能かどうかを検証する際に呼び出されるメソッド。このメソッドを書き換えることでそのときの処理を記述することができる。
+	 * @param {XMLHttpRequest} xhr sendメソッド内から開始位置を受信するためのajaxリクエストを送るのに使用したXMLHttpRequestオブジェクト
+	 */
+	this.onLogin=function(xhr){
+		console.log("login:"+xhr.responseText);
+	};
 	/**
 	ID登録用のメソッド。この関数を呼び出すことでIDを登録する。
 	登録した際の挙動は、onRegistメソッドで定義する。
@@ -41,14 +61,13 @@ var ImageRegist = function(registmes,sendmes,onVerify){
 	@param {string} [usernameTagName] ID登録の際のユーザー名として用いる入力フォームを表すタグのIDを表す文字列。使用しない場合にはnameRegistがデフォルトとして用いられる。
 	*/
 	this.regist=function(imageTagName,usernameTagName) {
-		irDirectoryPath=irpath;
+		//登録用の関数です。
 		if(imageTagName==undefined) {
 			imageTagName="imgRegist";
 		}
 		if(usernameTagName==undefined) {
 			usernameTagName="nameRegist";
 		}
-		//登録用の関数です。
 		var xhr= new XMLHttpRequest();
 		var userNameTag=document.getElementById(usernameTagName);
 		var userName=userNameTag.value;
@@ -58,51 +77,36 @@ var ImageRegist = function(registmes,sendmes,onVerify){
 		fd.append("registImg",upImageTag.files[0]);
 		xhr.onreadystatechange=function() {
 			if(xhr.readyState>=4) {
+				self.login(imageTagName,usernameTagName);
 				self.onRegist(xhr);
 				xhr.abort();
 			}
 		};
-		xhr.open("POST",irDirectoryPath + "imageregist/regist.php",true);
+		xhr.open("POST",irpath + "imageregist/regist.php",true);
 		xhr.send(fd);
 	};
 	/**
-	認証及びデータ送付用のメソッド。
+	データ送付用のメソッド。
 	@param {string} postTargetPath POST対象のプログラムのパスを表す文字列です。
-	@param {string} [postContentTagName] ポストする内容を格納したタグのIDを表す文字列です。使用しない場合は、"writeContent"がデフォルトとして用いられます。
-	@param {string} [imageTagName] 認証の際のパスワードとして用いる画像ファイルデータを参照するためのタグのIDを表す文字列です。使用しない場合には"imgSend"がデフォルトとして用いられます。
-	@param {string} [usernameTagName] ID登録の際のユーザー名として用いる入力フォームを表すタグのIDを表す文字列です。使用しない場合には"nameSend"がデフォルトとして用いられます。
+	@param {FormData} postContent ポストする内容を格納したタグのIDを表す文字列です。使用しない場合は、"writeContent"がデフォルトとして用いられます。
 	*/
-	this.send=function(postTargetPath,postContentTagName,imageTagName,usernameTagName) {
+	this.send=function(postTargetPath,postContent) {
 		var self=this;
-		irDirectoryPath=irpath;
-		if(postContentTagName==undefined) {
-			postContentTagName="writeContent";
-		}
-		if(usernameTagName==undefined) {
-			usernameTagName="nameSend";
-		}
-		if(imageTagName==undefined) {
-			imageTagName="imgSend";
-		}
 		var xhr = new XMLHttpRequest();
-		var userName=document.getElementById(usernameTagName);
 		var fd=new FormData();
-		fd.append("username",userName.value);
+		var userName=localStorage.getItem(self.userName);
+		fd.append("username",userName);
 		xhr.onreadystatechange=function() {
 			if(xhr.readyState==4) {
 				var loginnum=xhr.responseText;
 				self.onVerify(xhr);
 				xhr.abort();
 				if(!isNaN(loginnum)) {
-					var postContentTag=document.getElementById(postContentTagName);
-					var veriImgTag=document.getElementById(imageTagName);
-					var postfd=new FormData();
-					postfd.append("writeContent",postContentTag.value);
-					self.sendContent(loginnum,postTargetPath,userName,veriImgTag,postfd);
+					self.sendContent(loginnum,postTargetPath,userName,postContent);
 				}
 			}
 		}
-		xhr.open("GET",irDirectoryPath+"imageregist/verification.php?username="+userName.value,true);
+		xhr.open("GET",irpath+"imageregist/verification.php?username="+userName,true);
 		xhr.send();
 	};
 	/**
@@ -112,42 +116,37 @@ var ImageRegist = function(registmes,sendmes,onVerify){
 	 * @param {int} loginNumber 認証コードを生成するための、画素の開始位置
 	 * @param {string} postTargetPath POST対象のパス
 	 * @param {Element} userNameTag ユーザー名を格納したタグ
-	 * @param {Element} verificationImageTag 画像ファイルを参照するためのタグ
 	 * @param {FormData} contentForm データを送信するためのフォームデータ
+	 * @param {file} verificationImage 参照対象の画像ファイル
 	 */
-	this.sendContent=function(loginNumber,postTargetPath,userNameTag,verificationImageTag,contentForm) {
+	this.sendContent=function(loginNumber,postTargetPath,userName,contentForm) {
 		var self=this;
 		var imgLength=32;//通信に使う画素数。
-		var arrayStart=loginNumber;//認証コードを使う最初の画素
-		var reader=new FileReader();
-		var filetype=verificationImageTag.files[0].type;
-		reader.readAsDataURL(verificationImageTag.files[0]);
-		reader.onload=function() {
-			var img = new Image();
-			img.onload = function() {
-				var canvas=document.createElement('canvas');
-				var context=canvas.getContext('2d');
-				canvas.width=img.width;
-				canvas.height=img.height;
-				context.drawImage(img,0,0);
-				var src=context.getImageData(0,0,img.width,img.height);//画像のデータを持つRGBA配列。4nが赤,4n+1が緑,4n+2が青,4n+3がアルファチャンネル
-				arrayStart=arrayStart%(src.data.length);//認証コードを使う最初の画素
-				var arr=self.srcToBytesForRLE(src,arrayStart,imgLength);
-				var verificationCode = self.bytesToHexString(arr);
-				contentForm.append("username",userNameTag.value);
-				contentForm.append("verificationCode",verificationCode);
-				var xhr = new XMLHttpRequest();
-				xhr.onreadystatechange=function() {
-					if(xhr.readyState>=4) {
-						self.onSend(xhr);
-						xhr.abort();
-					}
-				};
-				xhr.open("POST",postTargetPath,true);
-				xhr.send(contentForm);
+		var arrayStart=loginNumber;//認証コードを使う最初の画素。
+		var img = new Image();
+		img.onload = function() {
+			var canvas=document.createElement('canvas');
+			var context=canvas.getContext('2d');
+			canvas.width=img.width;
+			canvas.height=img.height;
+			context.drawImage(img,0,0);
+			var src=context.getImageData(0,0,img.width,img.height);//画像のデータを持つRGBA配列。4nが赤,4n+1が緑,4n+2が青,4n+3がアルファチャンネル
+			arrayStart=arrayStart%(src.data.length);//認証コードを使う最初の画素
+			var arr=self.srcToBytesForRLE(src,arrayStart,imgLength);
+			var verificationCode = self.bytesToHexString(arr);
+			contentForm.append("username",userName);
+			contentForm.append("verificationCode",verificationCode);
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange=function() {
+				if(xhr.readyState>=4) {
+					self.onSend(xhr);
+					xhr.abort();
+				}
 			};
-			img.src=reader.result;
-		}
+			xhr.open("POST",postTargetPath,true);
+			xhr.send(contentForm);
+		};
+		img.src=localStorage.getItem(self.localStorageName);
 	};
 	/**
 	 * 画像のソースデータを、ランレングス圧縮した0~255のint型配列に変換するメソッド。
@@ -264,18 +263,57 @@ var ImageRegist = function(registmes,sendmes,onVerify){
 		alpha=src.data[(index+3)%src.data.length];
 		return red|green|blue|alpha;
 	};
+	/**
+	 * ログイン処理として、localStorageへ登録を行う。
+	 * 登録を行い、ログインの成否をonLogin関数で確認する。
+	 * ログインが成功した場合onLogin関数の第一引数のXMLHttpResponseのresponseTextフィールドは0,失敗した場合には1となる。
+	 * @param {string} [imageTagName] 認証の際のパスワードとして用いる画像ファイルデータを参照するためのタグのIDを表す文字列です。使用しない場合には"imgRegist"がデフォルトとして用いられます。
+	 * @param {string} [usernameTagName] ID登録の際のユーザー名として用いる入力フォームを表すタグのIDを表す文字列です。使用しない場合には"nameRegist"がデフォルトとして用いられます。
+	 */
+	this.login=function(imageTagName,usernameTagName) {
+		var self=this;
+		self.setLocalStorageImage(imageTagName, usernameTagName, function() {
+			var loginIR = new ImageRegist(
+				self.localStorageName,
+			);
+			loginIR.onSend=function(xhr){
+				self.onLogin(xhr);
+			};
+			loginIR.onVerify=function(xhr) {};
+			loginIR.send(irpath+"imageregist/login.php",new FormData(),usernameTagName);
+		});
+	};
+	/**
+	 * localStorageへ画像とユーザー名の登録を行う。
+	 * localStorageのItemとして、このImageRegistオブジェクトのusername及びlocalStorageNameプロパティをItem名としてユーザー名及び認証画像を登録する。
+	 * @param {string} [imageTagName] 認証の際のパスワードとして用いる画像ファイルデータを参照するためのタグのIDを表す文字列です。使用しない場合には"imgRegist"がデフォルトとして用いられます。
+	 * @param {string} [usernameTagName] ID登録の際のユーザー名として用いる入力フォームを表すタグのIDを表す文字列です。使用しない場合には"nameRegist"がデフォルトとして用いられます。
+	 */
+	this.setLocalStorageImage=function(imageTagId, usernameTagId, onloadFunction) {
+		if(imageTagId==undefined) {
+			imageTagId="imgRegist";
+		}
+		if(usernameTagId==undefined) {
+			usernameTagId="nameRegist";
+		}
+		var veriImgTag=document.getElementById(imageTagId);
+		var nameTag=document.getElementById(usernameTagId);
+		var myname=nameTag.value;
+		var reader=new FileReader();
+		reader.readAsDataURL(veriImgTag.files[0]);
+		reader.onload=function() {
+			var img = new Image();
+			img.onload = function() {
+				var canvas=document.createElement('canvas');
+				var context=canvas.getContext('2d');
+				canvas.width=img.width;
+				canvas.height=img.height;
+				context.drawImage(img,0,0);
+				localStorage.setItem(self.userName,myname);
+				localStorage.setItem(self.localStorageName,canvas.toDataURL());
+				onloadFunction();
+			};
+			img.src=reader.result;
+		}
+	};
 };
-/**
- * 送信用のサンプルインスタンス。
- */
-var imageregist = new ImageRegist(
-	function(xhr) {
-		console.log("registed message:"+xhr.responseText);
-	},
-	function(xhr) {
-		console.log("response:"+xhr.responseText);
-	},
-	function(xhr) {
-		console.log("arrHeader:"+xhr.responseText);
-	}
-);
