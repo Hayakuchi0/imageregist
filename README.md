@@ -9,7 +9,7 @@ png,jpg,gif画像ファイルデータをパスワードとして用いるため
 現在はテキストデータのみ送信することができます。
 フロント側ではhtml5に対応したjavascriptが動作する必要があります。
 バックエンドではhttpデーモン、phpが動作する必要があります。
-CentOSでのPHP5.4,UbuntuでのPHP7.0における動作を確認しましたが、Windowsではimageregist/imgr_config.phpの$id_filed_locate_dirを編集する必要があります。
+CentOSでのPHP5.4,UbuntuでのPHP7.0における動作を確認しましたが、Windowsではimageregist/imgr\_config.phpの$id\_filed\_locate\_dirを編集する必要があります。
 
 
 ## 動作確認
@@ -39,7 +39,7 @@ httpd php php-gd
 install.phpをroot権限で実行することでハッシュの保存先ディレクトリを作成します。
 imageregist.js及びimageregistディレクトリをhttpアクセス可能な同一ディレクトリに格納したのち、imageregist.jsをhtmlファイルから読み込むことで使用できます。
 
-```
+```shell
 $ git clone https://github.com/Hayakuchi0/imageregist.git 
 $ cd imageregist
 # php install.php
@@ -50,10 +50,12 @@ $ cp imageregist* <httpdのhttpアクセス参照先>
 ## 使用方法
 
 サンプルコードは、exampleディレクトリ内を参照してください。
+また、インストール方法を参照してインストールしてから以下の手順を実行してください。
 
 ### バックエンド側
 
-check_verification_code関数を呼び出すことで認証の成否が判定できます。 
+check\_verification\_code関数を呼び出すことで認証の成否が判定できます。 
+POST対象ではcheck\_verification\_code関数を呼び出すようソースを記述してください。
 
 ### フロントエンド側
 
@@ -61,22 +63,34 @@ check_verification_code関数を呼び出すことで認証の成否が判定で
 
 ユーザーの登録は、以下の手順で可能です。
 
-* ImageRegist型のオブジェクトを作成(作成の際、引数に登録時の処理を渡すことで登録時の処理を定義、その際の引数のresponseTextは登録の状況を表す(0なら成功、1なら失敗、2なら既に登録済みのIDであることを表す))
-* ユーザー名としてタグID,"nameRegist"を用いたタグにユーザー名を格納
-* パスワードとして用いる画像を参照するためのタグとしてタグID,"imgRegist"にパスワード用の画像ファイルを格納
-* 作成したImageRegist型のオブジェクトのregistメソッドを呼び出す
-* 上記のタグ名は、registメソッドの呼び出し時に指定することで変更できる
+1. ImageRegist型のオブジェクトを作成する。この際、引数にlocalStorageで用いる名前を代入する。これはサイトごとのcookieと同じ役割を果たすので、サイト内ではこの名称は統一する。
+2. 1.で作成したオブジェクトのメンバonRegistに登録時の処理を記述した無名関数を代入する。
+3. ユーザー固有の画像を格納するfileタグと、ユーザーのIDを入力するためのinputタグを作成、IDをつける。
+4. ユーザーの操作によって3.の2つの内容を入力
+5. 1.で作成したオブジェクトのregistメソッドを呼び出す。
+	1. 第一引数には画像ファイルを格納したfileタグ(3.で作成したタグ)のタグIDを指定する。省略した場合には"imgRegist"がデフォルトとして使用される。
+	2. 第二引数にはユーザーのIDを入力するためのinputタグ(3.で作成したタグ)のタグIDを指定する。省略した場合には"nameRegist"がデフォルトとして使用される。
+6. 1で作成したオブジェクトのregist関数を呼び出す。
+
 
 #### 認証及びデータの送信
 
 認証及びデータの送信は、以下の手順で可能です。
 
-* ImageRegist型のオブジェクトを作成(作成の際、引数に送信時の処理及び認証コード生成の元となる数値の受信時の処理を定義できる)
-* ユーザー名としてタグID,"nameSend"を用いたタグにユーザー名を格納
-* 送信内容としてタグID,"writeContent"を用いたタグに送信内容を格納
-* パスワードとして用いる画像を参照するためのタグとしてタグID,"imgSend"にパスワード用の画像ファイルを格納
-* 作成したImageRegist型のオブジェクトのsendメソッドを、POST先と共に呼び出す
-* 上記のタグ名は、sendメソッドの呼び出し時に指定することで変更できる
+1. ImageRegist型のオブジェクトを作成する。この際、引数にlocalStorageで用いる名前を代入する。これはサイトごとのcookieと同じ役割を果たすので、サイト内ではこの名称は統一する。
+2. 1.で作成したオブジェクトのメンバに、無名関数としてそれぞれ以下の処理を記述、代入する。
+	* onSendにコンテンツ送信完了時の処理
+	* onVerifyに接続成功したときの処理
+	* onLoginでログインを試みた結果を受信した時の処理
+3. ユーザー固有の画像を格納するfileタグと、ユーザーのIDを入力するためのinputタグを作成、IDをつける。
+4. ユーザーの操作によって3.2つの内容を入力。
+5. 1.で作成したオブジェクトのlogin関数を呼び出すことで認証を行い、localStorageに登録する。(ちなみに、この処理はユーザーの登録時にも行われている。)
+	1. 第一引数には画像ファイルを格納したfileタグ(3.で作成したタグ)のタグIDを指定する。省略した場合には"imgRegist"がデフォルトとして使用される。
+	2. 第二引数にはユーザーのIDを入力するためのinputタグ(3.で作成したタグ)のタグIDを指定する。省略した場合には"nameRegist"がデフォルトとして使用される。
+6. FormData型のオブジェクトを作成し、そこに送信内容を格納する。
+7. 1.で作成したオブジェクトのsendメソッドを呼び出すことでデータを送信する。
+	1. 第一引数にはポスト先のアドレスを指定する。これは省略不可。
+	2. 第二引数にはFormData型の送信内容(6.で作成したオブジェクト)を指定する。これは省略不可。
 
 
 ## Contribution
@@ -89,6 +103,7 @@ check_verification_code関数を呼び出すことで認証の成否が判定で
 [MIT](https://github.com/Hayakuchi0/imageregist/blob/master/LICENSE/password_compat.md)
 
 
-## Author
+## Authors
 
-[Hayakuchi](https://github.com/Hayakuchi0)
+[Hayakuchi0](https://github.com/Hayakuchi0)
+[Anthony Ferrara](https://github.com/ircmaxell)

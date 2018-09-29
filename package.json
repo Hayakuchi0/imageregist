@@ -1,0 +1,30 @@
+{
+  "name": "imageregist",
+  "version": "1.0.0",
+  "description": "module of regist by image file",
+  "main": "imageregist.js",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.6.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hayakuchi0/imageregist.git"
+  },
+  "keywords": [
+    "image",
+    "password"
+  ],
+  "author": "Hayakuchi0",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hayakuchi0/imageregist/issues"
+  },
+  "homepage": "https://github.com/Hayakuchi0/imageregist#readme"
+}

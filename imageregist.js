@@ -15,7 +15,7 @@ var irpath=document.currentScript.src.substr(0,document.currentScript.src.lastIn
  * @constructor
  */
 var ImageRegist = function(localStorageName){
-	self=this;
+	var self=this;
 	/**
 	 * このImageRegistオブジェクトで認証に用いる画像をブラウザに保存するときに使用するlocalStorageのItem名。string型。
 	 * 必須となるstring型の引数です。
@@ -105,7 +105,7 @@ var ImageRegist = function(localStorageName){
 					self.sendContent(loginnum,postTargetPath,userName,postContent);
 				}
 			}
-		}
+		};
 		xhr.open("GET",irpath+"imageregist/verification.php?username="+userName,true);
 		xhr.send();
 	};
@@ -125,8 +125,8 @@ var ImageRegist = function(localStorageName){
 		var arrayStart=loginNumber;//認証コードを使う最初の画素。
 		var img = new Image();
 		img.onload = function() {
-			var canvas=document.createElement('canvas');
-			var context=canvas.getContext('2d');
+			var canvas=document.createElement("canvas");
+			var context=canvas.getContext("2d");
 			canvas.width=img.width;
 			canvas.height=img.height;
 			context.drawImage(img,0,0);
@@ -169,7 +169,7 @@ var ImageRegist = function(localStorageName){
 			if((i%4)==0) {
 				//アルファチャンネルを格納する場合
 				//arr[i]=src.data[arrayStart+i+3]//アルファ値が取得出来ないのでREDにする。
-				arr[i]=src.data[(startPixel+i)%src.data.length]
+				arr[i]=src.data[(startPixel+i)%src.data.length];
 			} else {
 				//RGBを格納する場合
 				arr[i]=src.data[(startPixel+i-1)%src.data.length];
@@ -212,7 +212,7 @@ var ImageRegist = function(localStorageName){
 				selectionIndex+=4;
 				continuityNum+=1;
 			}
-			for(j=0;j<4;j++) {
+			for(var j=0;j<4;j++) {
 				arr[(i*8)+4+j]=((continuityNum>>((3-j)*8))%256);
 			}
 			//今配列に格納した色を前の色として格納
@@ -257,10 +257,10 @@ var ImageRegist = function(localStorageName){
 	 * @return {int} RGBA値を取得
 	 */
 	this.getSrcRGBA=function(src,index) {
-		red=src.data[index%src.data.length]<<24;
-		green=src.data[(index+1)%src.data.length]<<16;
-		blue=src.data[(index+2)%src.data.length]<<8;
-		alpha=src.data[(index+3)%src.data.length];
+		var red=src.data[index%src.data.length]<<24;
+		var green=src.data[(index+1)%src.data.length]<<16;
+		var blue=src.data[(index+2)%src.data.length]<<8;
+		var alpha=src.data[(index+3)%src.data.length];
 		return red|green|blue|alpha;
 	};
 	/**
@@ -274,12 +274,12 @@ var ImageRegist = function(localStorageName){
 		var self=this;
 		self.setLocalStorageImage(imageTagName, usernameTagName, function() {
 			var loginIR = new ImageRegist(
-				self.localStorageName,
+				self.localStorageName
 			);
 			loginIR.onSend=function(xhr){
 				self.onLogin(xhr);
 			};
-			loginIR.onVerify=function(xhr) {};
+			loginIR.onVerify=function() {};
 			loginIR.send(irpath+"imageregist/login.php",new FormData(),usernameTagName);
 		});
 	};
@@ -304,8 +304,8 @@ var ImageRegist = function(localStorageName){
 		reader.onload=function() {
 			var img = new Image();
 			img.onload = function() {
-				var canvas=document.createElement('canvas');
-				var context=canvas.getContext('2d');
+				var canvas=document.createElement("canvas");
+				var context=canvas.getContext("2d");
 				canvas.width=img.width;
 				canvas.height=img.height;
 				context.drawImage(img,0,0);
@@ -314,6 +314,6 @@ var ImageRegist = function(localStorageName){
 				onloadFunction();
 			};
 			img.src=reader.result;
-		}
+		};
 	};
 };
