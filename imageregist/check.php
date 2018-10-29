@@ -12,9 +12,10 @@
 	 * ロックファイルが存在する、40文字以上、半角英数字以外の文字列を使用している、
 	 * これらに該当する場合にはfalseを返す。
 	 * @param stirng $username 確認対象のユーザー名
+	 * @param string $user_list 改行で区切られたユーザー名の一覧を表すstring型の変数。先頭が/であればこの変数は使わずに、簡易認証のkhファイルを使用する。
 	 * @return bool 使用可能なユーザー名だった場合true,そうでない場合false
 	 */
-	function username_check($username) {
+	function username_check($username,$user_list) {
 		global $id_files_locate_dir;
 		$lockpath=$id_files_locate_dir."".$username.".kl";
 		if(file_exists($lockpath)) {
@@ -32,7 +33,7 @@
 	};
 	/**
 	 * 認証コードに対応するユーザー名が、正しく認識されたかどうかを返す。
-	 * ディレクトリトラバーサル及び処理の効率化のため、ユーザー名が使用可能かどうかを調べて、その時点で使用不能なユーザー名だった場合に規制する。
+	 * ディレクトリトラバーサル防止及び処理の効率化のため、ユーザー名が使用可能かどうかを調べて、その時点で使用不能なユーザー名だった場合に規制する。
 	 * その後ユーザー名に対応したロックファイルを作成する。
 	 * その後認証コードをpassword_verifyで認証し、失敗したらロックファイルを消してfalseを返す。
 	 * 認証に成功したら、キーハッシュを記述したファイルの1行目に、1を加算しロックファイルを削除する。
@@ -43,7 +44,7 @@
 	 * @return bool ユーザー名に対応する認証コードだった場合のみtrue
 	 */
 	function check_verification_code($username,$verification_code) {
-		if(username_check($username)) {
+		if(username_check($username,$user_list,'/')) {
 			global $id_files_locate_dir,$regist_hash_linenum;
 			$lockpath=$id_files_locate_dir."".$username.".kl";
 			touch($lockpath);

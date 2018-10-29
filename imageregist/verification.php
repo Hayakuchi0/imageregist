@@ -12,18 +12,21 @@
  */
 	require_once("imgr_config.php");
 	require_once("check.php");
-	$uname=strval($_GET[$username]);
-	if(username_check($uname)) {
-		$hashpath=$id_files_locate_dir.$uname.".kh";
-		if(file_exists($hashpath)) {
-			$list=file($hashpath,FILE_IGNORE_NEW_LINES);
-			$login_num=(((int)$list[0])%$regist_hash_linenum)+1;
-			$hash_point_data=explode(":",$list[$login_num]);
-			print($hash_point_data[0]);
+	if($type_easy) {
+		$uname=strval($_GET[$username]);
+		if(username_check($uname,"/")) {
+			$hashpath=$id_files_locate_dir.$uname.".kh";
+			if(file_exists($hashpath)) {
+				$list=file($hashpath,FILE_IGNORE_NEW_LINES);
+				$login_num=(((int)$list[0])%$regist_hash_linenum)+1;
+				$hash_point_data=explode(":",$list[$login_num]);
+				print($hash_point_data[0]);
+			} else {
+				print("そのユーザーは存在しません。ユーザー名をもう一度確認して下さい。");
+			}
 		} else {
-			print("そのユーザーは存在しません。ユーザー名をもう一度確認して下さい。");
+			print("不正なユーザー名なので、ログイン処理を中断しました。");
 		}
 	} else {
-		print("不正なユーザー名なので、ログイン処理を中断しました。");
 	}
 ?>

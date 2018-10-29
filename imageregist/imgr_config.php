@@ -10,4 +10,5 @@
 	$verification_code='verificationCode';//ID登録時及び書き込み時にPOSTするFormDataにappendで追加する際の名前。ここに認証コードが入る。また、ハッシュ値に対応する画素を取得するためGETするクエリの名前
 	$regist_pixel_length=32;//送信する色の数
 	$regist_hash_linenum=16;//サーバーに保存するハッシュ値の数
+	$type_easy=true;
 ?>
