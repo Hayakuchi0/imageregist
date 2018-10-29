@@ -11,4 +11,8 @@
 	$regist_pixel_length=32;//送信する色の数
 	$regist_hash_linenum=16;//サーバーに保存するハッシュ値の数
 	$type_easy=true;
+	function advanced_verification() {
+	}
+	function advanced_regist() {
+	}
 ?>

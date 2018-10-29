@@ -9,5 +9,6 @@
 	if($type_easy) {
 		regist($regist_img,$username,"/");
 	} else {
+		advanced_regist();
 	}
 ?>

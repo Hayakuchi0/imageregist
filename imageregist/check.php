@@ -44,27 +44,41 @@
 	 * @return bool ユーザー名に対応する認証コードだった場合のみtrue
 	 */
 	function check_verification_code($username,$verification_code) {
-		if(username_check($username,$user_list,'/')) {
+		if(username_check($username,'/')) {
 			global $id_files_locate_dir,$regist_hash_linenum;
-			$lockpath=$id_files_locate_dir."".$username.".kl";
-			touch($lockpath);
 			$hashpath=$id_files_locate_dir."".$username.".kh";
 			$list=file($hashpath,FILE_IGNORE_NEW_LINES);
-			$login_num=(((int)$list[0])%$regist_hash_linenum)+1;
-			$hash_point_data=explode(":",$list[$login_num]);
-			if(password_verify($verification_code,$hash_point_data[1])) {
+			return (compare_hashlist($username,$verification_code,$list)>=0);
+		}
+		return false;
+	}
+	function check_verification_code_advance($username,$verification_code,$hashlist_string,$user_list) {
+		if(username_check($username,$user_list)) {
+			$list=explode("\n",$hashlist_string);
+			return compare_hashlist($username,$verification_code,$list);
+		}
+		return -1;
+	}
+	function compare_hashlist($username,$verification_code,$list) {
+		global $id_files_locate_dir,$regist_hash_linenum,$type_easy;
+		$lockpath=$id_files_locate_dir."".$username.".kl";
+		touch($lockpath);
+		$login_num=(((int)$list[0])%$regist_hash_linenum)+1;
+		$hash_point_data=explode(":",$list[$login_num]);
+		if(password_verify($verification_code,$hash_point_data[1])) {
+			if($type_easy) {
+				$hashpath=$id_files_locate_dir."".$username.".kh";
 				$list[0]=$list[0]+1;
 				$out=$list[0];
 				for($i=0;$i<$regist_hash_linenum;$i++) {
 					$out=$out."\n".$list[$i+1];
 				}
 				file_put_contents($hashpath,$out);
-				unlink($lockpath);
-				return true;
 			}
 			unlink($lockpath);
-			return false;
+			return ($list[0]+1);
 		}
-		return false;
+		unlink($lockpath);
+		return -1;
 	}
 ?>

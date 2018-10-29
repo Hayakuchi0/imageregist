@@ -28,5 +28,6 @@
 			print("不正なユーザー名なので、ログイン処理を中断しました。");
 		}
 	} else {
+		advanced_verification();
 	}
 ?>
