@@ -1,9 +1,23 @@
 <?php
-	require_once("imgr_config.php");	
-	require_once("check.php");
-	if(check_verification_code($_POST[$username],$_POST["verificationCode"])) {
-		print("0");
-	} else {
-		print("1");
-	}
+/**
+ * ユーザーのログインを行うためのPOST先
+ *
+ * PHP Version >= 5.4
+ *
+ * @category  PostTarget
+ * @package   ImageRegist
+ * @author    Hayakuchi <hayakuchi@hinesm.info>
+ * @copyright 2018 The Author
+ * @license   MIT License 
+ * @link      https://github.com/Hayakuchi0/imageregist/blob/master/README.md
+ */
+namespace hinesmImageRegist {
+    include_once "imgr_config.php";
+    include_once "check.php";
+    if (checkVerificationCode($_POST[$username], $_POST["verificationCode"])) {
+        print("0");
+    } else {
+        print("1");
+    }
+}
 ?>
