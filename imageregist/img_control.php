@@ -2,6 +2,8 @@
 /**
  * 画像データを扱う為に使用する関数をまとめたソース。
  *
+ * 一部使用しないものもある。
+ *
  * PHP Version >= 5.4
  *
  * @category  Function
@@ -12,7 +14,7 @@
  * @link      https://github.com/Hayakuchi0/imageregist/blob/master/README.md
  */
 namespace hinesmImageRegist {
-        //画像ファイルのヘッダ一覧
+    //画像ファイルのヘッダ一覧
     $format_list=array(
         "png_header"=>"89504e470d0a1a0a",/*8byteのpngシグネチャ*/
         "jpg_header"=>"ffd8ff",/*3byteのjpgシグネチャ(正確には先頭2byteがシグネチャだが、3byte目まではどのフォーマットもFFに統一されているので3byte目まで用意。)*/
@@ -30,7 +32,7 @@ namespace hinesmImageRegist {
      *
      * @return bool 画像ファイルが、幅高さともに1以上のjpg,gif,pngのいずれかの画像ファイルであるかを表す。
      */
-    function is_img($img_file)
+    function isImg($img_file)
     {
         $img=imagecreatefromfile($img_file);
         $width=imagesx($img);
@@ -46,14 +48,14 @@ namespace hinesmImageRegist {
      *
      * @return string 画像ファイルの形式を返す。jpg,gif,png,otherの4パターンのいずれか。
      */
-    function get_img_type($img_file)
+    function getImgType($img_file)
     {
         global $format_list;
         $fp=fopen($img_file, "r");
         $header=fread($fp, 8);
         fclose($fp);
         foreach ($format_list as $key => $value) {
-            if (compare_string_head(bin2hex($header), $value)) {
+            if (compareStringHead(bin2hex($header), $value)) {
                 $names=(explode("_", $key));
                 if ($names[0]==="bmp") {//PHP7じゃないとbmp読み込めない
                     return "other";
@@ -72,7 +74,7 @@ namespace hinesmImageRegist {
      *
      * @return bool 文字列が一致するか
      */
-    function compare_string_head($str1,$str2)
+    function compareStringHead($str1,$str2)
     {
         $str_length=min(strlen($str1), strlen($str2));
         return (substr($str1, 0, $str_length)===substr($str2, 0, $str_length));
@@ -90,7 +92,7 @@ namespace hinesmImageRegist {
     function imagecreatefromfile($img_file,$img_type)
     {
         if (func_num_args()<2) {
-            $img_type=get_img_type($img_file);
+            $img_type=getImgType($img_file);
         }
         switch($img_type) {
         case "png":
@@ -126,9 +128,9 @@ namespace hinesmImageRegist {
         $colarr=array(256*256*256,256*256,256,1);
         $width=imagesx($img);
         $height=imagesy($img);
-        $srcLength=$width*$height;
-        $selectionIndex=0;
-        $beforeColor=imagecolorat(
+        $src_length=$width*$height;
+        $selection_index=0;
+        $before_color=imagecolorat(
             $img,
             getXfromArrayHeader(
                 $arr_header,
@@ -137,7 +139,7 @@ namespace hinesmImageRegist {
             ),
             getYfromArrayHeader(
                 $arr_header,
-                $selectionIndex,
+                $selection_index,
                 $width,
                 $height
             )
@@ -145,68 +147,68 @@ namespace hinesmImageRegist {
         for ($index=0;$index<$img_length;$index++) {
             for ($i=0;$i<4;$i++) {
                 if ($i==0) {//アルファ値を取得出来ないのでREDと同じにする。
-                    $out=($beforeColor/$colarr[1])%256;
+                    $out=($before_color/$colarr[1])%256;
                 } else {
-                    $out=($beforeColor/$colarr[$i])%256;
+                    $out=($before_color/$colarr[$i])%256;
                 };
                 $ret[($index*8)+$i]=(int)($out);
             }
-            $continuityNum=0;
-            $x=getXfromArrayHeader($arr_header, $selectionIndex, $width);
-            $y=getYfromArrayHeader($arr_header, $selectionIndex, $width, $height);
-            $locate=$arr_header+$selectionIndex;
+            $continuity_num=0;
+            $x=getXfromArrayHeader($arr_header, $selection_index, $width);
+            $y=getYfromArrayHeader($arr_header, $selection_index, $width, $height);
+            $locate=$arr_header+$selection_index;
             $indexmod=1;
-            $colorChanged=false;
-            while (!(($indexmod==0)||$colorChanged)) {
-                $selectionIndex+=1;
-                $indexmod=(($arr_header+$selectionIndex)%$srcLength);
+            $color_changed=false;
+            while (!(($indexmod==0)||$color_changed)) {
+                $selection_index+=1;
+                $indexmod=(($arr_header+$selection_index)%$src_length);
                 $x=getXfromArrayHeader(
                     $arr_header,
-                    $selectionIndex,
+                    $selection_index,
                     $width
                 );
                 $y=getYfromArrayHeader(
                     $arr_header,
-                    $selectionIndex,
+                    $selection_index,
                     $width,
                     $height
                 );
-                $colorChanged=(imagecolorat($img, $x, $y)!=$beforeColor);
-                $continuityNum+=1;
+                $color_changed=(imagecolorat($img, $x, $y)!=$before_color);
+                $continuity_num+=1;
             }
             for ($i=0;$i<4;$i++) {
-                $ret[($index*8)+4+$i]=(($continuityNum>>((3-$i)*8))%256);
+                $ret[($index*8)+4+$i]=(($continuity_num>>((3-$i)*8))%256);
             }
-            $beforeColor=imagecolorat($img, $x, $y);
+            $before_color=imagecolorat($img, $x, $y);
         }
         return $ret;
     }
     /**
      * 現在選んでいる一次元配列の位置から、そのx位置を返す関数。
      *
-     * @param int $arr_header     配列位置
-     * @param int $selectionIndex 配列位置の追加位置
-     * @param int $width          2次元画像だった場合の幅
+     * @param int $arr_header      配列位置
+     * @param int $selection_index 配列位置の追加位置
+     * @param int $width           2次元画像だった場合の幅
      *
      * @return int 算出されたx位置
      */
-    function getXfromArrayHeader($arr_header,$selectionIndex,$width)
+    function getXfromArrayHeader($arr_header,$selection_index,$width)
     {
-        return ($arr_header+$selectionIndex)%$width;
+        return ($arr_header+$selection_index)%$width;
     }
     /**
      * 現在選んでいる一次元配列の位置から、そのy位置を返す関数。
      *
-     * @param int $arr_header     配列位置
-     * @param int $selectionIndex 配列位置の追加位置
-     * @param int $width          2次元画像だった場合の幅
-     * @param int $height         2次元画像だった場合の高さ
+     * @param int $arr_header      配列位置
+     * @param int $selection_index 配列位置の追加位置
+     * @param int $width           2次元画像だった場合の幅
+     * @param int $height          2次元画像だった場合の高さ
      *
      * @return int 算出されたy位置
      */
-    function getYfromArrayHeader($arr_header,$selectionIndex,$width,$height)
+    function getYfromArrayHeader($arr_header,$selection_index,$width,$height)
     {
-        return (floor(($arr_header+$selectionIndex)/$width))%$height;
+        return (floor(($arr_header+$selection_index)/$width))%$height;
     }
     /**
      * 画像を一次元配列にするための関数。
@@ -263,7 +265,7 @@ namespace hinesmImageRegist {
      */
     function oneDimensionRGBFullString($img)
     {
-        return array_to_hex(oneDimensionRGBFull($img));
+        return arrayToHex(oneDimensionRGBFull($img));
     }
     /**
      * 整数型の一次元配列を16進数表記の文字列に変換する関数。
@@ -274,7 +276,7 @@ namespace hinesmImageRegist {
      *
      * @return string int型配列の各要素を16進数表記にしてつなげた文字列
      */
-    function array_to_hex($arr)
+    function arrayToHex($arr)
     {
         $ret="";
         $arr_length=count($arr);
@@ -301,7 +303,7 @@ namespace hinesmImageRegist {
      */
     function oneDimensionString($img,$img_length,$arr_header)
     {
-        return array_to_hex(oneDimensionRGBforRLE($img, $img_length, $arr_header));
+        return arrayToHex(oneDimensionRGBforRLE($img, $img_length, $arr_header));
     }
     /**
      * 整数型の配列の要素をそれぞれ加算する。
@@ -313,13 +315,13 @@ namespace hinesmImageRegist {
      *
      * @return array 加算結果を格納したint型の配列
      */
-    function array_add($data_arr,$color_arr)
+    function arrayAdd($data_arr,$color_arr)
     {
         $ret=array();
         $da_length=count($data_arr);
         $ca_length=count($color_arr);
         for ($i=0;$i<$da_length;$i++) {
-            $ret[$i]=binary_add($data_arr[$i], $color_arr[$i]);
+            $ret[$i]=binaryAdd($data_arr[$i], $color_arr[$i]);
         }
         return $ret;
     }
@@ -333,7 +335,7 @@ namespace hinesmImageRegist {
      *
      * @return int 加算結果
      */
-    function binary_add($byte1,$byte2)
+    function binaryAdd($byte1,$byte2)
     {
         return ($byte1+$byte2)%256;
     }

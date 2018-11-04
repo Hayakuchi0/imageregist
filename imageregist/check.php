@@ -13,7 +13,6 @@
  */
 namespace hinesmImageRegist {
     include_once "imgr_config.php";
-    include_once "img_control.php";
     include_once "password.php";
     /**
      * ユーザー名が正常に使用できるものかを確認するための関数。
@@ -48,7 +47,7 @@ namespace hinesmImageRegist {
      *
      * ディレクトリトラバーサル防止及び処理の効率化のため、ユーザー名が使用可能かどうかを調べて、その時点で使用不能なユーザー名だった場合にはその場でfalseを返す。
      * 認証コードが正常に認証された場合trueを返す。そうでない場合falseを返す。
-     * 認証コードの文法は、hinesmImageRegist/getkh関数を参照すること。
+     * 認証コードの文法は、\hinesmImageRegist\getkh関数を参照すること。
      *
      * @param string $username          認証したいユーザー名
      * @param string $verification_code 画像データと開始位置から算出した認証コード
@@ -69,15 +68,15 @@ namespace hinesmImageRegist {
      * 認証コードに対応するユーザーが、正しく認識されたかどうかを返す。(advance版)
      *
      * ディレクトリトラバーサル防止及び処理の効率化のため、ユーザー名が使用可能かどうかを調べて、その時点で使用不能なユーザー名だった場合にはその場でtrueを返す。
-     * その確認にはhinesmImageRegist/usernameCheckを使うのでそちらを参照すること。
-     * 認証コードの文法は、hinesmImageRegist/getkh関数を参照すること。
+     * その確認には\hinesmImageRegist\usernameCheckを使うのでそちらを参照すること。
+     * 認証コードの文法は、\hinesmImageRegist\getkh関数を参照すること。
      *
      * @param string $username          認証したいユーザー名。
      * @param string $verification_code 画像データと開始位置から算出した認証コード。
      * @param string $hashlist_string   ユーザーごとに定義された、画像に対応するハッシュ値の一覧を表した文字列。
-     *                                  文法はhinesmImageRegist/getkh関数を参照。
+     *                                  文法は\hinesmImageRegist\getkh関数を参照。
      * @param string $user_list         ユーザーの一覧が格納された文字列。
-     *                                  文法はhinesmImageRegist/usernameCheck関数を参照。
+     *                                  文法は\hinesmImageRegist\usernameCheck関数を参照。
      *
      * @return bool ユーザー名に対応する正しい認証コードだった場合のみtrue、それ以外はfalse。
      */
@@ -99,7 +98,7 @@ namespace hinesmImageRegist {
      * まずユーザー名に対応したロックファイルを作成する。
      * ユーザー名が正常に認識されていた場合ハッシュ値一覧と$verification_codeを比較する。
      * imgr_config.phpの$type_easyがtrueであればキーハッシュのログイン回数を更新する。
-     * そうでない場合、refresh_login_number_advenceを呼び出す。
+     * そうでない場合、\hinesmImageRegist\refreshLoginNumberAdvenceを呼び出す。
      * その後、ロックファイルを削除する。
      *
      * @param string $username          認証したいユーザー名。

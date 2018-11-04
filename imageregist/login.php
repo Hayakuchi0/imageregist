@@ -2,6 +2,7 @@
 /**
  * ユーザーのログインを行うためのPOST先
  *
+ * ログインに成功したら0を、失敗したら1を返す。
  * PHP Version >= 5.4
  *
  * @category  PostTarget

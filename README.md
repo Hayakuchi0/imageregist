@@ -54,8 +54,8 @@ $ cp imageregist* <httpdのhttpアクセス参照先>
 
 ### バックエンド側
 
-check\_verification\_code関数を呼び出すことで認証の成否が判定できます。 
-POST対象ではcheck\_verification\_code関数を呼び出すようソースを記述してください。
+imageregist/check.phpの\\hinesmImageRegist\\checkVerificationCode関数を呼び出すことで認証の成否が判定できます。 
+POST対象ではcheckVerificationCode関数を呼び出すようソースを記述してください。
 
 ### フロントエンド側
 

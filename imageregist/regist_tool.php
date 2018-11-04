@@ -21,10 +21,11 @@ namespace hinesmImageRegist {
      * 認証用のデータの登録を行うための関数。この関数を用いて登録を行う。
      *
      * @param string $input_file_imgtn  POSTするFormData型変数の
-                                        append関数に追加するfile型の画像データの
-                                        FormData上での名前。
-     * @param string $input_text_usertn POSTするFormData型変数のappend関数に追加する
-                                        string型の変数usernameのFormData上での名前。
+     *                                  append関数に追加する
+     *                                  file型の画像データのFormData上での名前。
+     * @param string $input_text_usertn POSTするFormData型変数の
+     *                                  append関数に追加する
+     *                                  ユーザー名を表すstring型変数のFormData上での名前。
      * @param string $user_list         改行で区切られたユーザー名の一覧を表すstring型の変数。
                                         先頭が/であればこの変数は使わずに、
                                         簡易認証のkhファイルを使用する。
@@ -68,7 +69,7 @@ namespace hinesmImageRegist {
                 }
                 if ($img_upon) {
                     $img_file=$_FILES[$img_tn]['tmp_name'];
-                    if (is_img($img_file)) {
+                    if (isImg($img_file)) {
                          return true;
                     } else {
                          print("対応している画像形式はjpg,gif,pngのみです。");
@@ -111,7 +112,7 @@ namespace hinesmImageRegist {
     /**
      * 認証用画像に応じたハッシュ値を保存する関数。
      * 保存結果をboolean型の値として返す。
-     * 保存内容はhinesmImageRegist/getkhを参照。
+     * 保存内容は\hinesmImageRegist\getkhを参照。
      *
      * @param string $img_file      認証用画像ファイルのパス
      * @param string $key_hash_path 認証用画像ファイル保存先のパス
@@ -126,7 +127,8 @@ namespace hinesmImageRegist {
     /**
      * 認証用画像の画素の位置と、その位置に対応したハッシュ値を記した文字列を返す関数。
      * 1行目に0を入れ、それ以降の行はハッシュ値を出力する。
-     * 画像を1次元としたときの位置をランダムに0~100000のランダムな値を選び、そこからランレングス圧縮した$regist_pixel_lengthの数値と同じ回数分の色をパスワードとして、password_hash関数を使用してハッシュ値を作成する。(img_control.phpのoneDimensionRGBforString関数を参照)。
+     * 画像を1次元としたときの位置をランダムに0~100000のランダムな値を選び、そこからランレングス圧縮した$regist_pixel_lengthの数値と同じ回数分の色をパスワードとして、password_hash関数を使用してハッシュ値を作成する。
+     * (\hinesmImageRegist\oneDimensionRGBforString関数を参照。)
      * ハッシュ値の前には選ばれたランダムな値を格納する。
      * 1行ごとの内容は以下のとおりである。2行目以降はこの内容を、$regist_hash_linenumと同じ行数分用意する。
      * <乱数>:<乱数と画像に対応したハッシュ値>
