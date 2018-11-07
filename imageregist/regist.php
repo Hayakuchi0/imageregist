@@ -15,7 +15,7 @@ namespace hinesmImageRegist {
     include_once "imgr_config.php";
     include_once "regist_tool.php";
     if ($type_easy) {
-        regist($regist_img, $username, "/");
+        regist();
     } else {
         advancedRegist();
     }

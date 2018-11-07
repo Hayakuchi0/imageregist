@@ -18,10 +18,10 @@ namespace hinesmImageRegist {
     include_once "imgr_config.php";
     include_once "check.php";
     if ($type_easy) {
-        $uname=strval($_GET[$username]);
-        if (usernameCheck($uname, "/")) {
+        $uname=strval($_GET[$fd_username]);
+        if (usernameCheck($uname)==0) {
             $hashpath=$id_files_locate_dir.$uname.".kh";
-            if (file_exists($hashpath)) {
+            if (existUser($uname)) {
                 $list=file($hashpath, FILE_IGNORE_NEW_LINES);
                 $login_num=(((int)$list[0])%$regist_hash_linenum)+1;
                 $hash_point_data=explode(":", $list[$login_num]);

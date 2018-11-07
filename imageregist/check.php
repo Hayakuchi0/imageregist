@@ -15,82 +15,65 @@ namespace hinesmImageRegist {
     include_once "imgr_config.php";
     include_once "password.php";
     /**
-     * ユーザー名が正常に使用できるものかを確認するための関数。
-     * ロックファイルが存在する、40文字以上、半角英数字以外の文字列を使用している、
-     * これらに該当する場合にはfalseを返す。
+     * 認証コードに対応するユーザー名が、正しく認識されたかどうかを返す。
      *
-     * @param stirng $username  確認対象のユーザー名
-     * @param string $user_list 改行で区切られたユーザー名の一覧を表すstring型の変数。
-     *                          先頭が/であればこの変数は使わずに、簡易認証のkhファイルを使用する。
-     *
-     * @return bool 使用可能なユーザー名だった場合true,そうでない場合false
-     */
-    function usernameCheck($username, $user_list)
-    {
-        global $id_files_locate_dir;
-        $lockpath=$id_files_locate_dir."".$username.".kl";
-        if (file_exists($lockpath)) {
-            print("他の認証処理を行っています。");
-        } else if (strlen($username)>40) {
-            //文字列の長さを確認
-            print("文字数が長過ぎます！\n");
-        } else if (!(ctype_alnum($username))) {
-            //半角英数字か確認
-            print("使用できる文字列は半角英数字のみです。\n");
-        } else {
-            return true;
-        }
-        return false;
-    };
-    /**
-     * 認証コードに対応するユーザー名が、正しく認識されたかどうかを返す。(簡易認証版)
-     *
-     * ディレクトリトラバーサル防止及び処理の効率化のため、ユーザー名が使用可能かどうかを調べて、その時点で使用不能なユーザー名だった場合にはその場でfalseを返す。
-     * 認証コードが正常に認証された場合trueを返す。そうでない場合falseを返す。
-     * 認証コードの文法は、\hinesmImageRegist\getkh関数を参照すること。
+     * ディレクトリトラバーサル防止及び処理の効率化のため、ユーザー名が正常化を確認したから。\hinesmImageRegist\usernameCheck関数を参照。
+     * 次にユーザーが登録済みかどうかを調べる。詳細は\hinesmImageRegist\existUser関数を参照。
+     * \hinesmImageRegist\getHashStringで取得したハッシュ一覧と、認証コードを比較する。
+     * 詳細は\hinesmImageRegist\compareHashlist関数を参照。
      *
      * @param string $username          認証したいユーザー名
      * @param string $verification_code 画像データと開始位置から算出した認証コード
      *
-     * @return bool ユーザー名に対応する認証コードだった場合のみtrue
+     * @return int ユーザー名に対応する認証コードであり、正常に認証できてる場合0である。
+     *             ユーザーが存在しない場合は1である。
+     *             ユーザーが存在し、認証コードの比較に失敗した場合は2である。
+     *             ユーザー名が不正、または現在ロック中である場合は10以上19以下である。詳細は\hinesmImageRegist\usernameCheck関数を参照。
      */
     function checkVerificationCode($username, $verification_code)
     {
-        if (usernameCheck($username, '/')) {
-            global $id_files_locate_dir,$regist_hash_linenum;
-            $hashpath=$id_files_locate_dir."".$username.".kh";
-            $list=file($hashpath, FILE_IGNORE_NEW_LINES);
-            return (compareHashlist($username, $verification_code, $list));
+        $ucheck=usernameCheck($username);
+        if ($ucheck>0) {
+            return $ucheck;
         }
-        return false;
+        if (!existUser($username)) {
+            return 1;
+        }
+        if (compareHashlist(
+            $username,
+            $verification_code,
+            getHashString($username)
+        )
+        ) {
+            return 0;
+        }
+        return 2;
     }
     /**
-     * 認証コードに対応するユーザーが、正しく認識されたかどうかを返す。(advance版)
+     * ユーザー名が正常に使用できるものかを確認するための関数。
+     * ロックファイルが存在する、40文字以上、半角英数字以外の文字列を使用している、
+     * これらに該当する場合にはfalseを返す。
      *
-     * ディレクトリトラバーサル防止及び処理の効率化のため、ユーザー名が使用可能かどうかを調べて、その時点で使用不能なユーザー名だった場合にはその場でtrueを返す。
-     * その確認には\hinesmImageRegist\usernameCheckを使うのでそちらを参照すること。
-     * 認証コードの文法は、\hinesmImageRegist\getkh関数を参照すること。
+     * @param stirng $username 確認対象のユーザー名
      *
-     * @param string $username          認証したいユーザー名。
-     * @param string $verification_code 画像データと開始位置から算出した認証コード。
-     * @param string $hashlist_string   ユーザーごとに定義された、画像に対応するハッシュ値の一覧を表した文字列。
-     *                                  文法は\hinesmImageRegist\getkh関数を参照。
-     * @param string $user_list         ユーザーの一覧が格納された文字列。
-     *                                  文法は\hinesmImageRegist\usernameCheck関数を参照。
-     *
-     * @return bool ユーザー名に対応する正しい認証コードだった場合のみtrue、それ以外はfalse。
+     * @return int 使用可能なユーザー名かどうかを返す。
+     *             0であれば使用可能なユーザーである。
+     *             10であれば他の認証処理をしている途中である。
+     *             11であればユーザー名が40文字以上である。
+     *             12であればユーザー名が半角英数字以外である。
      */
-    function checkVerificationCodeAdvance(
-        $username,
-        $verification_code,
-        $hashlist_string,
-        $user_list
-    ) {
-        if (usernameCheck($username, $user_list)) {
-            $list=explode("\n", $hashlist_string);
-            return compareHashlist($username, $verification_code, $list);
+    function usernameCheck($username)
+    {
+        global $id_files_locate_dir;
+        $lockpath=$id_files_locate_dir."".$username.".kl";
+        if (file_exists($lockpath)) {
+            return 10;
+        } else if (strlen($username)>40) {
+            return 11;
+        } else if (!(ctype_alnum($username))) {
+            return 12;
         }
-        return false;
+        return 0;
     }
     /**
      * 認証コードが正しいかを確認する関数。
@@ -105,6 +88,7 @@ namespace hinesmImageRegist {
      * @param string $verification_code 画像データと開始位置から算出した認証コード。
      * @param array  $list              ユーザーごとに定義された、
      *                                  画像に対応するハッシュ値の一覧を表した文字列を行ごとに分けて配列にしたもの。
+     *                                  配列にする前の認証コードの文法は、\hinesmImageRegist\getkh関数を参照すること。
      *
      * @return bool ユーザーが正常に認証された場合true,そうでない場合はfalseを返す。
      */
@@ -115,6 +99,7 @@ namespace hinesmImageRegist {
         touch($lockpath);
         $login_num=(((int)$list[0])%$regist_hash_linenum)+1;
         $hash_point_data=explode(":", $list[$login_num]);
+        error_log("penpennnnnnnnnn:".$verification_code);
         if (password_verify($verification_code, $hash_point_data[1])) {
             $out=strval($list[0]+1);
             for ($i=0;$i<$regist_hash_linenum;$i++) {

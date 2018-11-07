@@ -50,7 +50,8 @@
 		</h2>
 		<form id="imgForm">
 			<input type="text" id="nameSend" name="username" placeholder="ユーザー名を入れて下さい"></input><br>
-			ユーザー名を入力したあとクリックしてID登録の時に選んだ画像を選択することでログインします。→<input type="file" id="imgSend" multiple onchange="login();"></input><br>
+			ID登録の時に選んだ画像を選択してください。→<input type="file" id="imgSend"></input><br>
+			<input type="button" onclick="login();" value="ログイン"></input><br>
 		</form>
 		<form id="contentForm">
 			<textarea id="writeContent" name="writeContentBoard" placeholder="怒られない程度に書きたいことを書いて下さい。"></textarea><br>

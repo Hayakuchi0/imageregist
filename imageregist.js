@@ -279,7 +279,9 @@ var ImageRegist = function(localStorageName){
 			loginIR.onSend=function(xhr){
 				self.onLogin(xhr);
 			};
-			loginIR.onVerify=function() {};
+			loginIR.onVerify=function(xhr) {
+				self.onVerify(xhr);
+			};
 			loginIR.send(irpath+"imageregist/login.php",new FormData(),usernameTagName);
 		});
 	};

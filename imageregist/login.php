@@ -2,7 +2,8 @@
 /**
  * ユーザーのログインを行うためのPOST先
  *
- * ログインに成功したら0を、失敗したら1を返す。
+ * ログインに成功したら0を、失敗したらそれ以外の値を返す。
+ * 詳細は\hinesmImageRegist\checkVerificationCode関数を参照。
  * PHP Version >= 5.4
  *
  * @category  PostTarget
@@ -15,10 +16,10 @@
 namespace hinesmImageRegist {
     include_once "imgr_config.php";
     include_once "check.php";
-    if (checkVerificationCode($_POST[$username], $_POST["verificationCode"])) {
-        print("0");
-    } else {
-        print("1");
-    }
+    print(checkVerificationCode(
+        $_POST[$fd_username],
+        $_POST[$fd_verification_code]
+    )
+    );
 }
 ?>
