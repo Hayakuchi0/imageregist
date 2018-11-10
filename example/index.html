@@ -7,16 +7,22 @@
 		<script>
 			var imgrgst= new ImageRegist("exampleLocalStorageName");
 			imgrgst.onLogin=function(response) {
+				var mes = document.getElementById("mesL");
 				mes.innerText=response.responseText;
 				viewMyUserId();
 			};
 			imgrgst.onRegist=function(response) {
+				var mes = document.getElementById("mesL");
+				mes.innerText="";
+				var mes = document.getElementById("mesR");
 				mes.innerText=response.responseText;
 			};
 			imgrgst.onSend=function(response) {
+				var mes = document.getElementById("mes");
 				mes.innerText=response.responseText;
 			};
 			imgrgst.onVerify=function(response) {
+				var mes = document.getElementById("mesV");
 				mes.innerText=response.responseText;
 			};
 			function send() {
@@ -40,8 +46,24 @@
 	</head>
 	<body onload="viewMyUserId();">
 		<h1>imageregistの動作テスト</h1>
-		<p id="mes">
-		</p>
+		<table>
+			<tr>
+				<th>VerifyStatus</th>
+				<td id="mesV"></td>
+			</tr>
+			<tr>
+				<th>LoginStatus</th>
+				<td id="mesL"></td>
+			</tr>
+			<tr>
+				<th>RegistStatus</th>
+				<td id="mesR"></td>
+			</tr>
+			<tr>
+				<th>ReceiveContent</th>
+				<td id="mes"></td>
+			</tr>
+		</table>
 		<h2>自分のID</h2>
 		<p id="myname">
 		</p>

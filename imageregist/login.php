@@ -16,10 +16,14 @@
 namespace hinesmImageRegist {
     include_once "imgr_config.php";
     include_once "check.php";
-    print(checkVerificationCode(
+    $ucheck=checkVerificationCode(
         $_POST[$fd_username],
         $_POST[$fd_verification_code]
-    )
     );
+    if ($ucheck>0) {
+        printErrorIR($ucheck);
+    } else {
+        print($ucheck);
+    }
 }
 ?>

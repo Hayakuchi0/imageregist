@@ -19,7 +19,8 @@ namespace hinesmImageRegist {
     include_once "check.php";
     if ($type_easy) {
         $uname=strval($_GET[$fd_username]);
-        if (usernameCheck($uname)==0) {
+        $ucheck=usernameCheck($uname);
+        if ($ucheck==0) {
             $hashpath=$id_files_locate_dir.$uname.".kh";
             if (existUser($uname)) {
                 $list=file($hashpath, FILE_IGNORE_NEW_LINES);
@@ -27,10 +28,10 @@ namespace hinesmImageRegist {
                 $hash_point_data=explode(":", $list[$login_num]);
                 print($hash_point_data[0]);
             } else {
-                print("そのユーザーは存在しません。ユーザー名をもう一度確認して下さい。");
+                printErrorIR(1);
             }
         } else {
-            print("不正なユーザー名なので、ログイン処理を中断しました。");
+            printErrorIR($ucheck);
         }
     } else {
         advanced_verification();

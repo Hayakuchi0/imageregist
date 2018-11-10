@@ -27,13 +27,17 @@ namespace hinesmImageRegist {
         global $fd_username, $fd_regist_img;
         $registResult = registCheck();
         if ($registResult==0) {
-            print(savekh(
+            $saveResult = savekh(
                 $_FILES[$fd_regist_img]['tmp_name'],
                 $_POST[$fd_username]
-            ));
+            );
+            if ($saveResult) {
+                print(0);
+            } else {
+                printErrorIR(30);
+            }
         } else {
-            print("ID登録に失敗しました。\n");
-            print("ErrorCode:".$registResult);
+            printErrorIR($registResult);
         }
     }
     /**
@@ -46,9 +50,9 @@ namespace hinesmImageRegist {
      * @return int アップロードされたファイルが正常に登録できるかどうかを返す。
      *             0であれば正常に登録が可能。
      *             1であればユーザーが登録済み。それ以外は正常。
-     *             2であればユーザー名が入力されていないため登録不可能。
-     *             3であればアップロードされたファイルが存在しないため登録不可能。
-     *             4であればアップロードされたファイルjpg,gif,jpg以外であるため登録不可能。
+     *             20であればユーザー名が入力されていないため登録不可能。
+     *             21であればアップロードされたファイルが存在しないため登録不可能。
+     *             22であればアップロードされたファイルjpg,gif,jpg以外であるため登録不可能。
      *             10以上19以下であればユーザー名が不正であるため登録不可能。詳細は\hinesmImageRegist\UsernameCheckを参照。
      */
     function registCheck()
@@ -57,7 +61,7 @@ namespace hinesmImageRegist {
         //ちゃんと中身を入れたか確認
         if (array_key_exists($fd_username, $_POST)) {
             $user_name=strval($_POST[$fd_username]);
-            $ucheck=UsernameCheck($user_name, $user_list);
+            $ucheck=UsernameCheck($user_name);
             if ($ucheck==0) {
                 $img_exist=array_key_exists($fd_regist_img, $_FILES);
                 $img_upon=false;
@@ -68,21 +72,20 @@ namespace hinesmImageRegist {
                     $img_file=$_FILES[$fd_regist_img]['tmp_name'];
                     if (isImg($img_file)) {
                         if (existUser($user_name)) {
-                            return 1;
+                            return 3;
                         } else {
                             return 0;
                         }
                     } else {
-                         return 4;
+                         return 22;
                     }
                 } else {
-                    return 3;
+                    return 21;
                 }
             }
-        } else {
             return $ucheck;
         }
-        return 2;
+        return 20;
     }
     /**
      * 認証用画像に応じたハッシュ値を作成し、保存する関数。

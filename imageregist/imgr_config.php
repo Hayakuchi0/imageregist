@@ -21,6 +21,19 @@ namespace hinesmImageRegist {
     $regist_pixel_length=32;//送信する色の数。
     $regist_hash_linenum=16;//サーバーに保存するハッシュ値の数。
     $type_easy=true;//advanced認証を行うかどうかを選ぶ。trueであれば簡易認証を、falseであればadvanced認証を使う。
+    $error_messages = array(
+        "0" => "Success",/*アクセス成功*/
+        "1" => "Not exist posted username yet.",/*ユーザー名として使用できる文字列だが存在しないユーザーを参照した。*/
+        "2" => "Invalid image posted.",/*参照先のユーザーが存在するが、画像が正しい画像ではない。*/
+        "3" => "Exist posted username already.",/*ユーザー名として使用できる文字列だがユーザーは既に存在する。*/
+        "10" => "User is registed now other.",/*参照先のユーザーは他の認証処理をしている最中である。*/
+        "11" => "Username is invalid. Because over 40 characters.",/*ユーザー名として40文字以上の文字を使用しているため参照を拒否。*/
+        "12" => "Username is invalid. Because Username contain not alnum character.",/*ユーザー名として半角英数字以外を参照したため参照を拒否。*/
+        "20" => "Username is not posted.",/*ユーザー名が入力されていないため登録不可能。*/
+        "21" => "Image not uploaded.",/*ファイルがアップロードされていないため登録不可能*/
+        "22" => "Upload image is not jpg, gif, png.",/*アップロードされたファイルがjpg,gif,png以外であるため登録不可能。*/
+        "30" => "Internal server error in registration."/*正常なIDと画像を用いたものの、登録処理のみが失敗した。*/
+    );
     /**
      * 認証にadvanced認証を用いる際、ID登録を行う為にregist.phpへアクセスしたときに呼び出される関数。
      *
@@ -111,6 +124,21 @@ namespace hinesmImageRegist {
         $hashpath=$id_files_locate_dir.$username.".kh";
         $list=file($hashpath, FILE_IGNORE_NEW_LINES);
         return $list;
+    }
+    /**
+     * ImageRegist特有のエラーをメッセージにしてprintするための関数。
+     *
+     * エラーメッセージは以下の形式で出力する。
+     * ERROR:<エラーコード>;<エラーメッセージ>
+     *
+     * @param int $error_code エラーコード。\hinesmImageRegist\$error_messagesを参照。
+     *
+     * @return none 戻り値なし
+     */
+    function printErrorIR($error_code)
+    {
+         global $error_messages;
+         print("ERROR:".$error_code.";".$error_messages[strval($error_code)]);
     }
 }
 ?>
