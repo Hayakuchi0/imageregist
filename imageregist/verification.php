@@ -17,24 +17,19 @@
 namespace hinesmImageRegist {
     include_once "imgr_config.php";
     include_once "check.php";
-    if ($type_easy) {
-        $uname=strval($_GET[$fd_username]);
-        $ucheck=usernameCheck($uname);
-        if ($ucheck==0) {
-            $hashpath=$id_files_locate_dir.$uname.".kh";
-            if (existUser($uname)) {
-                $list=file($hashpath, FILE_IGNORE_NEW_LINES);
-                $login_num=(((int)$list[0])%$regist_hash_linenum)+1;
-                $hash_point_data=explode(":", $list[$login_num]);
-                print($hash_point_data[0]);
-            } else {
-                printErrorIR(1);
-            }
+    $uname=strval($_GET[$fd_username]);
+    $ucheck=usernameCheck($uname);
+    if ($ucheck==0) {
+        if (existUser($uname)) {
+            $list=getHashString($uname);
+            $login_num=(((int)$list[0])%$regist_hash_linenum)+1;
+            $hash_point_data=explode(":", $list[$login_num]);
+            print($hash_point_data[0]);
         } else {
-            printErrorIR($ucheck);
+            printErrorIR(1);
         }
     } else {
-        advanced_verification();
+        printErrorIR($ucheck);
     }
 }
 ?>

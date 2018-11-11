@@ -99,7 +99,7 @@ namespace hinesmImageRegist {
         touch($lockpath);
         $login_num=(((int)$list[0])%$regist_hash_linenum)+1;
         $hash_point_data=explode(":", $list[$login_num]);
-        error_log("penpennnnnnnnnn:".$verification_code);
+        error_log($hash_point_data[1]);
         if (password_verify($verification_code, $hash_point_data[1])) {
             $out=strval($list[0]+1);
             for ($i=0;$i<$regist_hash_linenum;$i++) {
@@ -113,6 +113,8 @@ namespace hinesmImageRegist {
             }
             unlink($lockpath);
             return true;
+        } else {
+            error_log($verification_code);
         }
         unlink($lockpath);
         return false;
