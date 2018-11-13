@@ -21,7 +21,7 @@ namespace hinesmImageRegist {
     $fd_verification_code='verificationCode';//ID登録時及び書き込み時にPOSTするFormDataにappendで追加する際の名前。ここに認証コードが入る。また、ハッシュ値に対応する画素を取得するためGETするクエリの名前。
     $regist_pixel_length=32;//送信する色の数。
     $regist_hash_linenum=16;//サーバーに保存するハッシュ値の数。
-    $type_easy=true;//advanced認証を行うかどうかを選ぶ。trueであれば簡易認証を、falseであればadvanced認証を使う。
+    $type_easy=false;//advanced認証を行うかどうかを選ぶ。trueであれば簡易認証を、falseであればadvanced認証を使う。
     $error_messages = array(
         "0" => "Success",/*アクセス成功*/
         "1" => "Not exist posted username yet.",/*ユーザー名として使用できる文字列だが存在しないユーザーを参照した。*/
@@ -50,6 +50,25 @@ namespace hinesmImageRegist {
      */
     function advancedRegist()
     {
+        global $fd_regist_img, $fd_username;
+        $rcResult=registCheck();
+        if ($rcResult>0) {
+            printErrorIR($rcResult);
+        } else {
+            $resultHash=getkh($_FILES[$fd_regist_img]['tmp_name']);
+            $pdoinfo="mysql:host=dbserver;dbname=imageregist;charset=utf8";
+            $sqlcmd = 'insert into users ( username, hashlist )'.
+                ' values ( :username, :hashlist )';
+            $pdo = new PDO($pdoinfo, "root", "example");
+            $stmt = $pdo->prepare($sqlcmd);
+            $stmt->bindParam('username', $_POST[$fd_username], PDO::PARAM_STR);
+            $stmt->bindParam('hashlist', $resultHash, PDO::PARAM_STR);
+            if ($stmt->execute()) {
+                print(0);
+            } else {
+                printErrorIR(30);
+            }
+        }
     }
     /**
      * 認証にadvanced認証を用いる際、ログイン回数を更新するために呼び出される関数。
@@ -65,6 +84,18 @@ namespace hinesmImageRegist {
      */
     function refreshLoginNumberAdvance($username, $hashlist)
     {
+        $pdoinfo="mysql:host=dbserver;dbname=imageregist;charset=utf8";
+        $sqlcmd = 'update users set hashlist = :hashlist'.
+            ' where username = :username';
+        $pdo = new PDO($pdoinfo, "root", "example");
+        $stmt = $pdo->prepare($sqlcmd);
+        $stmt->bindParam('username', $username, PDO::PARAM_STR);
+        $stmt->bindParam('hashlist', $hashlist, PDO::PARAM_STR);
+        if ($stmt->execute()) {
+            print(0);
+        } else {
+            printErrorIR(30);
+        }
         return false;
     }
     /**
@@ -79,7 +110,17 @@ namespace hinesmImageRegist {
      */
     function existUser($username)
     {
-        return existUserEasy($username);
+        $pdoinfo = "mysql:host=dbserver;dbname=imageregist;charset=utf8";
+        $pdo = new PDO($pdoinfo, "root", "example");
+        $query="select count(username) from users where username = :username";
+        $stmt= $pdo->prepare($query);
+        $stmt->bindParam("username", $username, PDO::PARAM_STR);
+        $stmt->execute();
+        $datas=$stmt->fetchAll();
+        if ($datas[0][0]==0) {
+            return false;
+        }
+        return true;
     }
     /**
      * 認証にadvanced認証を用いる際、ユーザーごとに登録されたハッシュ値の一覧を返すため呼び出される関数。
@@ -94,7 +135,15 @@ namespace hinesmImageRegist {
      */
     function getHashString($username)
     {
-        return getHashStringEasy($username);
+        $pdoinfo = "mysql:host=dbserver;dbname=imageregist;charset=utf8";
+        $pdo = new PDO($pdoinfo, "root", "example");
+        $query="select hashlist from users where username = :username";
+        $stmt= $pdo->prepare($query);
+        $stmt->bindParam("username", $username, PDO::PARAM_STR);
+        $stmt->execute();
+        $datas=$stmt->fetchAll();
+        $hashString=explode("\n", $datas[0][0]);
+        return $hashString;
     }
     ///////////ここから下は編集の必要なし/////////////
     /**
