@@ -6,10 +6,11 @@ png,jpg,gif画像ファイルデータをパスワードとして用いるため
 ## 詳細
 
 画像データをパスワードとして用いるため、画像データの一部をハッシュ化してデータを保存、認証時に切り取った位置を元に画像データの一部を送信、サーバー側で認証するモジュールです。
-現在はテキストデータのみ送信することができます。
 フロント側ではhtml5に対応したjavascriptが動作する必要があります。
 バックエンドではhttpデーモン、phpが動作する必要があります。
 CentOSでのPHP5.4,UbuntuでのPHP7.0における動作を確認しましたが、Windowsではimageregist/imgr\_config.phpの$id\_filed\_locate\_dirを編集する必要があります。
+サーバー側での動作は、imageregist/imgr\_config.phpにて$type\_easyをfalseにし、その中に定義された関数を定義することで保存先や媒体を定義することができます。
+それは[advanced認証](https://github.com/Hayakuchi0/imageregist/tree/advanced_ir)と定義しています。サンプルコードはリンク先を参照してください。
 
 
 ## 動作確認
